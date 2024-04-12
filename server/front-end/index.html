@@ -1,7 +1,25 @@
 <html>
-    <title>Here</title>
+<title>Here</title>
 
-    <body>
-        <h1>Welcome</h1>
-    </body>
+<body>
+    <div id="main"></div>
+
+    <script type="module">
+        // All the javascript code necessary.
+
+
+        async function signIn() {
+            const response = await fetch('/signin')
+            const payload = await response.json()
+
+            const mainDiv = document.getElementById('main')
+            mainDiv.innerHTML = `You are Logged In<br> UserId: ${payload.userId}<br> Email: ${payload.userEmail}`
+        }
+
+        // Called every time the page is loaded.
+        // Checks with the server to see if the user should sign in.
+        await signIn()
+    </script>
+</body>
+
 </html>
