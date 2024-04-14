@@ -2,18 +2,43 @@
 <title>Here</title>
 
 <body>
-    <div id="main"></div>
+    <div id="loggedInDiv" hidden="true">
+        <h1>You Are Logged In</h1>
+        <br><br>
+        <p id="loginInfo"></p>
+        <button id="signOutButton">Sign Out</button>
+    </div>
+    <div id="loggedOutDiv" hidden="true">
+        <h1>You are Logged Out</h1>
+        <button id="signInButton">Sign In</button>
+    </div>
 
     <script type="module">
         // All the javascript code necessary.
 
+        async function signOut() {
+            const response = await fetch('/signout')
+            const loggedInDiv = document.getElementById("loggedInDiv")
+            loggedInDiv.hidden = true
+            document.getElementById("loggedOutDiv").hidden = false
+        }
 
         async function signIn() {
             const response = await fetch('/signin')
             const payload = await response.json()
 
-            const mainDiv = document.getElementById('main')
-            mainDiv.innerHTML = `You are Logged In<br> UserId: ${payload.userId}<br> Email: ${payload.userEmail}`
+            const loginText = document.getElementById('loginInfo')
+            loginText.innerHTML = `
+                UserId: ${payload.userId}
+                <br><br>
+                Email: ${payload.userEmail}
+                `;
+            
+            const signOutButton = document.getElementById('signOutButton')
+            signOutButton.addEventListener('click', () => signOut())
+            const loggedInDiv = document.getElementById("loggedInDiv")
+            loggedInDiv.hidden = false
+            document.getElementById("loggedOutDiv").hidden = true
         }
 
         // Called every time the page is loaded.
