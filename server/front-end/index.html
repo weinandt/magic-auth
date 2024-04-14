@@ -16,34 +16,71 @@
     <script type="module">
         // All the javascript code necessary.
 
-        async function signOut() {
-            const response = await fetch('/signout')
-            const loggedInDiv = document.getElementById("loggedInDiv")
-            loggedInDiv.hidden = true
-            document.getElementById("loggedOutDiv").hidden = false
-        }
-
-        async function signIn() {
-            const response = await fetch('/signin')
-            const payload = await response.json()
-
+        function showSignIn(user){
             const loginText = document.getElementById('loginInfo')
             loginText.innerHTML = `
-                UserId: ${payload.userId}
+                UserId: ${user.userId}
                 <br><br>
-                Email: ${payload.userEmail}
+                Email: ${user.userEmail}
                 `;
             
-            const signOutButton = document.getElementById('signOutButton')
-            signOutButton.addEventListener('click', () => signOut())
+            
             const loggedInDiv = document.getElementById("loggedInDiv")
             loggedInDiv.hidden = false
             document.getElementById("loggedOutDiv").hidden = true
         }
 
+        function showSignOut(){
+            const loggedInDiv = document.getElementById("loggedInDiv")
+            loggedInDiv.hidden = true
+            document.getElementById("loggedOutDiv").hidden = false
+        }
+
+        function attachEventListeners(){
+            document.getElementById('signInButton').addEventListener('click', ()=>  signIn())
+            document.getElementById('signOutButton').addEventListener('click', () => signOut())
+        }
+
+        async function signIn() {
+            // TODO: read the email from an input text.
+            const response = await fetch('signin/test@test.com')
+            if (response.status != 200) {
+                console.error('could not sign in.')
+            } else {
+                const user = await getUser()
+                showSignIn(user)
+            }
+        }
+
+        async function signOut() {
+            try {
+                const response = await fetch('/signout')
+            } catch(error) {
+                console.error(error)
+            }
+            
+            showSignOut()
+        }
+
+        async function getUser() {
+            const response = await fetch('/user')
+            if (response.status == 401) {
+                return null
+            }
+            
+            return await response.json()
+        }
+
         // Called every time the page is loaded.
         // Checks with the server to see if the user should sign in.
-        await signIn()
+        attachEventListeners()
+        const user = await getUser()
+        if (user == null) {
+            showSignOut()
+        }
+        else {
+            showSignIn(user)
+        }
     </script>
 </body>
 

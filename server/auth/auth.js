@@ -1,7 +1,8 @@
 export const tokenCookieName = 'token'
 
 function isTokenValid(token) {
-    return token == "nick"
+    // TODO: implement jwt here.
+    return true
 }
 
 function getAuthTokenFromCookie(cookieHeaderValue) {
@@ -24,6 +25,7 @@ function getAuthTokenFromCookie(cookieHeaderValue) {
 }
 
 function parseUserFromToken(token) {
+    // TODO: actually read user info from the jwt.
     return {
         userId: 1234,
         userEmail: 'test@test.com',
