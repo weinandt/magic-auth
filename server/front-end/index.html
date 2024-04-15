@@ -10,6 +10,8 @@
     </div>
     <div id="loggedOutDiv" hidden="true">
         <h1>You are Logged Out</h1>
+        <label for="emailTextInput">Email:</label>
+        <input type="text" id="emailTextInput" name="email"/>
         <button id="signInButton">Sign In</button>
     </div>
 
@@ -42,8 +44,8 @@
         }
 
         async function signIn() {
-            // TODO: read the email from an input text.
-            const response = await fetch('signin/test@test.com')
+            const email = document.getElementById('emailTextInput').value
+            const response = await fetch(`signin/${email}`)
             if (response.status != 200) {
                 console.error('could not sign in.')
             } else {
