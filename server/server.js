@@ -7,7 +7,7 @@ const options = {
     cert: fs.readFileSync('httpsCerts/cert.pem'),
 };
 
-https.createServer(options, (req, res) => {
+https.createServer(options, async (req, res) => {
     // Serve the main page, no need to check auth.
     if (req.url == '/' || req.url == '') {
         res.writeHead(200)
@@ -36,14 +36,16 @@ https.createServer(options, (req, res) => {
 
             return
         }
-
-        const email = splits[2]
-
+        
         // TODO: send to SNS and have user click magic link
 
-        // TOOD: set a custom cookie here that can be read by the /user api
+        const email = splits[2]
+        const jwt = auth.createJWTForUser({
+            userName: 'tempUserName', // TODO: read this from a db.
+            userEmail: email,
+        })
         res.writeHead(200, {
-            'Set-Cookie': [`${auth.tokenCookieName}=myUserId;path=/`],
+            'Set-Cookie': [`${auth.tokenCookieName}=${jwt};path=/`],
         })
 
         res.end()
@@ -51,7 +53,7 @@ https.createServer(options, (req, res) => {
         return
     }
 
-    const user = auth.getUserFromCookie(req.headers?.cookie)
+    const user = await auth.getUserFromCookie(req.headers?.cookie)
     if (user == null) {
         res.writeHead(401)
         res.end(`401 Please sign in`)

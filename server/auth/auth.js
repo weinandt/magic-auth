@@ -1,8 +1,30 @@
+import jwt from "jsonwebtoken"
+
 export const tokenCookieName = 'token'
 
-function isTokenValid(token) {
-    // TODO: implement jwt here.
-    return true
+// TODO: move this into the config.
+const signingKey = 'asdkjfl;askjdf;alkfsj;alsjfd;lsfj;lasj'
+
+async function verifyAndDecodeToken(token) {
+    const verifyPromise = new Promise((resolve, reject) => {
+        jwt.verify(token, signingKey, (err, decoded) => {
+            if (err != null) {
+                reject(err)
+                return
+            }
+
+            resolve(decoded)
+        })
+    })
+    
+    try {
+        const decodedToken = await verifyPromise
+        return decodedToken
+    }
+    catch(err) {
+        console.log('error decoding token', err)
+        return null
+    }
 }
 
 function getAuthTokenFromCookie(cookieHeaderValue) {
@@ -24,23 +46,28 @@ function getAuthTokenFromCookie(cookieHeaderValue) {
     return ''
 }
 
-function parseUserFromToken(token) {
-    // TODO: actually read user info from the jwt.
+function parseUserFromDecodedToken(decodedToken) {
     return {
-        userId: 1234,
-        userEmail: 'test@test.com',
+        userName: decodedToken.userName,
+        userEmail: decodedToken.userEmail,
     }
 }
 
-export function getUserFromCookie(cookieHeaderValue) {
+export async function getUserFromCookie(cookieHeaderValue) {
     const token = getAuthTokenFromCookie(cookieHeaderValue)
     if (token == '') {
         return null
     }
 
-    if (!isTokenValid(token)) {
+    const decodedToken = await verifyAndDecodeToken(token)
+    if (decodedToken == null) {
         return null
     }
 
-    return parseUserFromToken(token)
+    return parseUserFromDecodedToken(decodedToken)
+}
+
+export function createJWTForUser(user){
+    // TODO: make this asymentric encrption
+    return jwt.sign(user, signingKey)
 }
