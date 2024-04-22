@@ -1,58 +1,54 @@
 import https from 'node:https'
 import fs from 'node:fs'
 import * as auth from './auth/auth'
+import express from 'express'
 
 const options = {
     key: fs.readFileSync('httpsCerts/key.pem'),
     cert: fs.readFileSync('httpsCerts/cert.pem'),
 };
 
-https.createServer(options, async (req, res) => {
-    // Serve the main page, no need to check auth.
-    if (req.url == '/' || req.url == '' || req.url == null) {
-        res.writeHead(200)
-        fs.createReadStream('front-end/index.html').pipe(res)
-        return
-    }
+const app = express()
 
-    if (req.url == '/signout') {
-        res.writeHead(200, {
-            'Set-Cookie': [`${auth.tokenCookieName}=signedOut; Max-Age=0;`],
-        })
+app.get('/', (req, res, next) => {
+    res.writeHead(200)
+    fs.createReadStream('front-end/index.html').pipe(res)
+})
 
-        res.end()
+app.get('/signout', (req, res, next) => {
+    res.writeHead(200, {
+        'Set-Cookie': [`${auth.tokenCookieName}=signedOut; Max-Age=0;`],
+    })
 
-        return
-    }
+    res.end()
+})
 
-    // No need to check the cookie on sign in.
-    if (req.url.startsWith('/signin')) {
-        // Grabbing the email from url.
-        // This would typically be supplied in a payload, but I don't want to parse the body.
-        const splits = req.url.split('/')
-        if (splits.length != 3) {
-            res.writeHead(401); // not found
-            res.end(`401 No Email Supplied ${req.url}`)
-
-            return
-        }
-        
-        // TODO: send to SNS and have user click magic link
-
-        const email = splits[2]
-        const jwt = auth.createJWTForUser({
-            userName: 'tempUserName', // TODO: read this from a db.
-            userEmail: email,
-        })
-        res.writeHead(200, {
-            'Set-Cookie': [`${auth.tokenCookieName}=${jwt};path=/`],
-        })
-
-        res.end()
+app.get('/signin*', (req, res, next) => {
+    // Grabbing the email from url.
+    // This would typically be supplied in a payload, but I don't want to parse the body.
+    const splits = req.url.split('/')
+    if (splits.length != 3) {
+        res.writeHead(401); // not found
+        res.end(`401 No Email Supplied ${req.url}`)
 
         return
     }
 
+    // TODO: send to SNS and have user click magic link
+
+    const email = splits[2]
+    const jwt = auth.createJWTForUser({
+        userName: 'tempUserName', // TODO: read this from a db.
+        userEmail: email,
+    })
+    res.writeHead(200, {
+        'Set-Cookie': [`${auth.tokenCookieName}=${jwt};path=/`],
+    })
+
+    res.end()
+})
+
+app.get('/user', async (req, res, next) => {
     const user = await auth.getUserFromCookie(req.headers?.cookie ?? null)
     if (user == null) {
         res.writeHead(401)
@@ -61,19 +57,15 @@ https.createServer(options, async (req, res) => {
         return
     }
 
+    res.writeHead(200, {
+        'Content-Type': 'application/json',
+    })
 
-    if (req.url.startsWith('/user')) {
-        res.writeHead(200, {
-            'Content-Type': 'application/json',
-        })
+    const jsonContent = JSON.stringify(user);
+    res.end(jsonContent)
+})
 
-        const jsonContent = JSON.stringify(user);
-        res.end(jsonContent);
-
-        return
-    }
-
-    res.setHeader("Content-Type", "text");
-    res.writeHead(404); // not found
-    res.end(`404 Not Found: ${req.url}`)
-}).listen(443); 
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(443, () => {
+    console.log('Server started on 443')
+})
