@@ -1,19 +1,19 @@
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 
 export const tokenCookieName = 'token'
 
 // TODO: move this into the config.
 const signingKey = 'asdkjfl;askjdf;alkfsj;alsjfd;lsfj;lasj'
 
-async function verifyAndDecodeToken(token) {
-    const verifyPromise = new Promise((resolve, reject) => {
+async function verifyAndDecodeToken(token: string): Promise<JwtPayload | null> {
+    const verifyPromise = new Promise<JwtPayload>((resolve, reject) => {
         jwt.verify(token, signingKey, (err, decoded) => {
             if (err != null) {
                 reject(err)
                 return
             }
 
-            resolve(decoded)
+            resolve(<JwtPayload>decoded)
         })
     })
     
@@ -27,7 +27,7 @@ async function verifyAndDecodeToken(token) {
     }
 }
 
-function getAuthTokenFromCookie(cookieHeaderValue) {
+function getAuthTokenFromCookie(cookieHeaderValue: string | null) {
     if (cookieHeaderValue == null || cookieHeaderValue == '') {
         return ''
     }
@@ -46,16 +46,21 @@ function getAuthTokenFromCookie(cookieHeaderValue) {
     return ''
 }
 
-function parseUserFromDecodedToken(decodedToken) {
+// TODO: move this to a shared area.
+export type User = {
+    userName: string
+    userEmail: string
+}
+function parseUserFromDecodedToken(decodedToken: JwtPayload): User {
     return {
         userName: decodedToken.userName,
         userEmail: decodedToken.userEmail,
     }
 }
 
-export async function getUserFromCookie(cookieHeaderValue) {
+export async function getUserFromCookie(cookieHeaderValue: string | null): Promise<User | null> {
     const token = getAuthTokenFromCookie(cookieHeaderValue)
-    if (token == '') {
+    if (token == null || token == '') {
         return null
     }
 
@@ -67,7 +72,7 @@ export async function getUserFromCookie(cookieHeaderValue) {
     return parseUserFromDecodedToken(decodedToken)
 }
 
-export function createJWTForUser(user){
+export function createJWTForUser(user: User){
     // TODO: make this asymentric encrption
     return jwt.sign(user, signingKey)
 }

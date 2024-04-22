@@ -1,6 +1,6 @@
 import https from 'node:https'
 import fs from 'node:fs'
-import * as auth from './auth/auth.js'
+import * as auth from './auth/auth'
 
 const options = {
     key: fs.readFileSync('httpsCerts/key.pem'),
@@ -9,7 +9,7 @@ const options = {
 
 https.createServer(options, async (req, res) => {
     // Serve the main page, no need to check auth.
-    if (req.url == '/' || req.url == '') {
+    if (req.url == '/' || req.url == '' || req.url == null) {
         res.writeHead(200)
         fs.createReadStream('front-end/index.html').pipe(res)
         return
@@ -53,7 +53,7 @@ https.createServer(options, async (req, res) => {
         return
     }
 
-    const user = await auth.getUserFromCookie(req.headers?.cookie)
+    const user = await auth.getUserFromCookie(req.headers?.cookie ?? null)
     if (user == null) {
         res.writeHead(401)
         res.end(`401 Please sign in`)
