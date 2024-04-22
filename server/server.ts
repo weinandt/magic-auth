@@ -23,20 +23,16 @@ app.get('/signout', (req, res, next) => {
     res.end()
 })
 
-app.get('/signin*', (req, res, next) => {
-    // Grabbing the email from url.
-    // This would typically be supplied in a payload, but I don't want to parse the body.
-    const splits = req.url.split('/')
-    if (splits.length != 3) {
-        res.writeHead(401); // not found
-        res.end(`401 No Email Supplied ${req.url}`)
+app.use(express.json())
 
+app.post('/signin', (req, res, next) => {
+    const email = req?.body?.email
+    if (email == null) {
+        res.status(400).send(`Email is required to authenticate`)
         return
     }
 
     // TODO: send to SNS and have user click magic link
-
-    const email = splits[2]
     const jwt = auth.createJWTForUser({
         userName: 'tempUserName', // TODO: read this from a db.
         userEmail: email,

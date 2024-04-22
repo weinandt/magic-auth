@@ -45,7 +45,13 @@
 
         async function signIn() {
             const email = document.getElementById('emailTextInput').value
-            const response = await fetch(`signin/${email}`)
+            const response = await fetch('/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({email})
+            })
             if (response.status != 200) {
                 console.error('could not sign in.')
             } else {
