@@ -10,4 +10,9 @@ test('Home Page Should Show Hello', async ({ page }) => {
   // Assert.
   expect(response.status()).toBe(200)
   await expect(page.locator('body')).toContainText('hello')
+
+
+  // Just printing the cookies to show how it can be done:
+  const cookies = await page.context().cookies()
+  console.log(cookies)
 });
