@@ -2,8 +2,12 @@
 
 Executes a test suite against multiple browser versions.
 
-## To Run:
+## Initial Set Up
 1. `npm install`
-2. `npm run install-playwright-browsers`
-3. `npm run test`
+1. `npm run install-playwright-browsers`
+    - This will install the playwright browsers in the `node_modules` folder
+
+## To Run E2E Tests:
+1. Have the server running: `npm start`
+2. `npm run test`
 4. `npm run show-test-report`

@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('Home Page Should Show Hello', async ({ page }) => {
+  const response = await page.goto('https://localhost')
+  if (response == null) {
+    test.fail()
+    return
+  }
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
+  // Assert.
+  expect(response.status()).toBe(200)
+  await expect(page.locator('body')).toContainText('hello')
 });

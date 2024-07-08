@@ -5,6 +5,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: '.',
+  use: {
+    ignoreHTTPSErrors: true, // Certs won't be for valid domains.
+  },
   /* Configure projects for major browsers */
   projects: [
     {
