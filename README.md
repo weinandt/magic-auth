@@ -2,7 +2,13 @@
 Simplest possible webserver and webpage which can do maglic link based auth.
 
 ## Set Up
-1. Modify `/etc/hosts` file to have `example.com` point to `127.0.0.1`
+1. Add the following to `/etc/hosts`:
+```text
+127.0.0.1 example.com
+127.0.0.1 auth.example.com
+127.0.0.1 othersite.com
+```
+
 2. Optional: generate certs (certs are already generated and checked into source (not recommended for prod use))
 
 ```bash
